@@ -1,10 +1,14 @@
 export interface Agent {
   id: string;
   name: string;
+  role: string;
   status: 'idle' | 'running' | 'completed' | 'error';
   progress: number;
   task?: string;
+  output?: string;
   lastActivity?: string;
+  startedAt?: Date;
+  completedAt?: Date;
 }
 
 export interface TaskCommand {
@@ -19,6 +23,15 @@ export interface TaskCommand {
 
 export interface GatewayMessage {
   type: 'command' | 'result' | 'error' | 'status';
-  payload: any;
+  payload: Record<string, unknown>;
   timestamp: string;
+}
+
+export interface Task {
+  id: string;
+  command: string;
+  type: 'website' | 'data-analysis' | 'research' | 'general';
+  agents: Agent[];
+  createdAt: Date;
+  completedAt?: Date;
 }

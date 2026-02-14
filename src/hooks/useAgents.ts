@@ -16,18 +16,21 @@ export function useAgents() {
         {
           id: 'agent-main',
           name: 'Main Agent',
+          role: 'Main Executor',
           status: 'idle',
           progress: 0,
         },
         {
           id: 'agent-sub-1',
           name: 'Sub Agent 1',
+          role: 'Specialist',
           status: 'idle',
           progress: 0,
         },
         {
           id: 'agent-sub-2',
           name: 'Sub Agent 2',
+          role: 'Specialist',
           status: 'idle',
           progress: 0,
         },
@@ -50,6 +53,7 @@ export function useAgents() {
     const newAgent: Agent = {
       id: `agent-${Date.now()}`,
       name,
+      role: 'Specialist',
       status: 'idle',
       progress: 0,
     };

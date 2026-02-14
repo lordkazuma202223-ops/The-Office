@@ -31,12 +31,11 @@ export function CommandInput({ onSubmit, isRunning }: CommandInputProps) {
           value={command}
           onChange={(e) => setCommand(e.target.value)}
           placeholder="Enter your task (e.g., 'Create a website for a coffee shop')"
-          className="w-full p-4 rounded-lg resize-none text-sm focus:outline-none focus:ring-2 transition-all duration-200"
+          className={`w-full p-4 rounded-lg resize-none text-sm transition-all duration-200 ${isDarkMode ? 'focus:ring-yellow-400' : 'focus:ring-yellow-500'}`}
           style={{
             backgroundColor: isDarkMode ? '#1a1a1a' : '#ffffff',
             border: `1px solid ${isDarkMode ? '#333' : '#e0e0e0'}`,
             color: isDarkMode ? '#ffffff' : '#000000',
-            focusRingColor: isDarkMode ? '#facc15' : '#eab308',
             minHeight: '120px',
           }}
           disabled={isRunning}

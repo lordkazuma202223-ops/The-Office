@@ -9,10 +9,10 @@ interface TaskResultsProps {
 }
 
 const statusColors = {
-  pending: 'text-gray-400',
+  idle: 'text-gray-400',
   running: 'text-yellow-400',
   completed: 'text-green-400',
-  failed: 'text-red-400',
+  error: 'text-red-400',
 };
 
 export function TaskResults({ task }: TaskResultsProps) {
@@ -31,7 +31,7 @@ export function TaskResults({ task }: TaskResultsProps) {
   }
 
   const completedCount = task.agents.filter(a => a.status === 'completed').length;
-  const failedCount = task.agents.filter(a => a.status === 'failed').length;
+  const errorCount = task.agents.filter(a => a.status === 'error').length;
   const runningCount = task.agents.filter(a => a.status === 'running').length;
 
   return (
@@ -46,7 +46,7 @@ export function TaskResults({ task }: TaskResultsProps) {
           <div>
             <span className="text-gray-400">Progress:</span>{' '}
             <span className="font-semibold">
-              {completedCount + failedCount} / {task.agents.length}
+              {completedCount + errorCount} / {task.agents.length}
             </span>
           </div>
         </div>
@@ -64,10 +64,10 @@ export function TaskResults({ task }: TaskResultsProps) {
                 ✓ {completedCount} Completed
               </span>
             )}
-            {failedCount > 0 && (
-              <span className={`text-xs px-2 py-1 rounded ${statusColors.failed}`}
+            {errorCount > 0 && (
+              <span className={`text-xs px-2 py-1 rounded ${statusColors.error}`}
                 style={{ backgroundColor: '#ef444420' }}>
-                ✗ {failedCount} Failed
+                ✗ {errorCount} Error
               </span>
             )}
             {runningCount > 0 && (

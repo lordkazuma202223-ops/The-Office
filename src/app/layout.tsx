@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { TaskProvider } from "@/contexts/TaskContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import "./globals.css";
 
 const inter = Inter({
@@ -21,9 +23,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body className="antialiased">
-        <ErrorBoundary>
-          {children}
-        </ErrorBoundary>
+        <ThemeProvider>
+          <TaskProvider>
+            <ErrorBoundary>
+              {children}
+            </ErrorBoundary>
+          </TaskProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

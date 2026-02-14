@@ -69,7 +69,7 @@ export function spawnAgents(command: string): Agent[] {
     id: `agent-${Date.now()}-${index}`,
     name: template.name,
     role: template.role,
-    status: 'pending' as const,
+    status: 'idle' as const,
     progress: 0,
     startedAt: undefined,
     completedAt: undefined,
@@ -81,7 +81,7 @@ export async function executeAgentTask(
   agentId: string,
   taskCommand: string,
   updateProgress: (agentId: string, progress: number, output?: string) => void,
-  completeAgent: (agentId: string, status: 'completed' | 'failed', output?: string) => void
+  completeAgent: (agentId: string, status: 'completed' | 'error', output?: string) => void
 ): Promise<void> {
   const agent = { id: agentId } as Agent;
 
@@ -110,7 +110,7 @@ export async function executeAgentTask(
 
   // Complete the agent
   const isSuccessful = Math.random() > 0.1; // 90% success rate
-  const status = isSuccessful ? 'completed' : 'failed';
+  const status = isSuccessful ? 'completed' : 'error';
   agent.completedAt = new Date();
 
   completeAgent(agentId, status, isSuccessful ? 'Task completed successfully!' : 'Task failed. Please try again.');

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Agent, Task } from '@/types/agent';
+import { Task } from '@/types/agent';
 import {
   spawnAgents,
   executeAgentTask,

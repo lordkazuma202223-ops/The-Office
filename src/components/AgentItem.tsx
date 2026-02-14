@@ -9,17 +9,17 @@ interface AgentItemProps {
 }
 
 const statusColors = {
-  pending: 'text-gray-400',
+  idle: 'text-gray-400',
   running: 'text-yellow-400',
   completed: 'text-green-400',
-  failed: 'text-red-400',
+  error: 'text-red-400',
 };
 
 const statusBgColors = {
-  pending: 'bg-gray-400',
+  idle: 'bg-gray-400',
   running: 'bg-yellow-400',
   completed: 'bg-green-400',
-  failed: 'bg-red-400',
+  error: 'bg-red-400',
 };
 
 export function AgentItem({ agent }: AgentItemProps) {
@@ -49,7 +49,7 @@ export function AgentItem({ agent }: AgentItemProps) {
             className="h-full transition-all duration-500 ease-out"
             style={{
               width: `${agent.progress}%`,
-              backgroundColor: agent.status === 'failed' ? '#f87171' : '#facc15',
+              backgroundColor: agent.status === 'error' ? '#f87171' : '#facc15',
             }}
           />
         </div>
@@ -66,7 +66,7 @@ export function AgentItem({ agent }: AgentItemProps) {
         </div>
       )}
 
-      {(agent.status === 'running' || agent.status === 'pending') && (
+      {(agent.status === 'running' || agent.status === 'idle') && (
         <div className="flex gap-1 mt-2">
           {[0, 1, 2].map(i => (
             <div

@@ -8,12 +8,13 @@ import { CommandInput } from '@/components/CommandInput';
 import { TaskResults } from '@/components/TaskResults';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { TaskHistory } from '@/components/TaskHistory';
+import { Task } from '@/types/agent';
 
 export default function Home() {
   const { currentTask, submitTask, isRunning, clearHistory, taskHistory } = useTask();
   const { isDarkMode } = useTheme();
 
-  const handleSelectHistoryTask = (task: any) => {
+  const handleSelectHistoryTask = (task: Task) => {
     // For now, just log it - in production, you'd load it into currentTask
     console.log('Selected task:', task);
   };
