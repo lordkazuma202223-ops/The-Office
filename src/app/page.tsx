@@ -21,15 +21,63 @@ export default function Home() {
 
   return (
     <div
-      className="min-h-screen flex"
+      className="min-h-screen flex flex-col md:flex-row"
       style={{ backgroundColor: isDarkMode ? '#000000' : '#ffffff' }}
     >
-      {/* Left Sidebar */}
-      <Sidebar agents={currentTask?.agents || []} />
+      {/* Mobile Header */}
+      <div className="md:hidden h-14 border-b flex items-center justify-between px-4"
+        style={{ borderColor: isDarkMode ? '#333' : '#e0e0e0', backgroundColor: isDarkMode ? '#0f0f0f' : '#fafafa' }}
+      >
+        <h1 className="text-lg font-bold flex items-center gap-2">
+          <span className="text-yellow-400">⚡</span>
+          <span className="truncate">Agent Task</span>
+        </h1>
+        <div className="flex items-center gap-3">
+          <TaskHistory
+            tasks={taskHistory}
+            onSelectTask={handleSelectHistoryTask}
+            onClearHistory={clearHistory}
+          />
+          <ThemeToggle />
+        </div>
+      </div>
 
-      {/* Main Content Area */}
-      <main className="flex-1 flex flex-col">
-        {/* Header */}
+      {/* Mobile Content */}
+      <main className="flex-1 flex flex-col md:hidden">
+        <div className="p-4">
+          <CommandInput onSubmit={submitTask} isRunning={isRunning} />
+        </div>
+        <TaskResults task={currentTask} />
+      </main>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="md:hidden h-16 border-t flex items-center justify-around px-4"
+        style={{ borderColor: isDarkMode ? '#333' : '#e0e0e0', backgroundColor: isDarkMode ? '#0f0f0f' : '#fafafa' }}
+      >
+        <button
+          onClick={() => console.log('Agents')}
+          className="flex flex-col items-center gap-1 p-2 rounded-lg touch-manipulation"
+          style={{ minHeight: '44px', minWidth: '44px' }}
+        >
+          <svg className="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a3 3 0 11-6 0 3 3 0 016 0zM6 3a3 3 0 11-6 0 3 3 0 016 0zm7-6a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span className="text-xs text-gray-400">Agents</span>
+        </button>
+        <button
+          className="flex flex-col items-center gap-1 p-2 rounded-lg touch-manipulation"
+          style={{ minHeight: '44px', minWidth: '44px' }}
+        >
+          <svg className="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002 2v2M7 7h10" />
+          </svg>
+          <span className="text-xs text-gray-400">Tasks</span>
+        </button>
+      </div>
+
+      {/* Desktop Layout */}
+      <Sidebar agents={currentTask?.agents || []} />
+      <main className="hidden md:flex flex-1 flex flex-col">
         <header
           className="h-16 border-b flex items-center justify-between px-6"
           style={{ borderColor: isDarkMode ? '#333' : '#e0e0e0', backgroundColor: isDarkMode ? '#0f0f0f' : '#fafafa' }}
@@ -48,10 +96,7 @@ export default function Home() {
           </div>
         </header>
 
-        {/* Command Input */}
         <CommandInput onSubmit={submitTask} isRunning={isRunning} />
-
-        {/* Results Display */}
         <TaskResults task={currentTask} />
       </main>
     </div>

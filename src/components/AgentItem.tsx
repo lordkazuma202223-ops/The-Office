@@ -31,10 +31,10 @@ export function AgentItem({ agent }: AgentItemProps) {
         backgroundColor: isDarkMode ? '#1a1a1a' : '#f5f5f5',
         borderColor: isDarkMode ? '#333' : '#e0e0e0',
       }}>
-      <div className="flex items-start justify-between mb-2">
-        <div className="flex-1">
-          <h3 className="font-semibold text-yellow-400 text-sm">{agent.name}</h3>
-          <p className="text-xs text-gray-400 mt-0.5">{agent.role}</p>
+      <div className="flex items-start justify-between mb-2 min-h-[44px]">
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-yellow-400 text-sm truncate">{agent.name}</h3>
+          <p className="text-xs text-gray-400 mt-0.5 truncate">{agent.role}</p>
         </div>
         <span className={`text-xs font-medium px-2 py-1 rounded ${statusColors[agent.status]}`}
           style={{ backgroundColor: isDarkMode ? `${statusBgColors[agent.status]}20` : `${statusBgColors[agent.status]}20` }}>
@@ -57,7 +57,7 @@ export function AgentItem({ agent }: AgentItemProps) {
       </div>
 
       {agent.output && (
-        <div className="mt-2 p-2 rounded text-xs"
+        <div className="mt-2 p-2 rounded text-xs break-all"
           style={{
             backgroundColor: isDarkMode ? '#0a0a0a' : '#ffffff',
             border: `1px solid ${isDarkMode ? '#333' : '#e0e0e0'}`,

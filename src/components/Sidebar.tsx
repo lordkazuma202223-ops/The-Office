@@ -15,7 +15,7 @@ export function Sidebar({ agents, title = 'Active Agents' }: SidebarProps) {
 
   return (
     <aside
-      className="w-80 flex-shrink-0 flex flex-col"
+      className="hidden md:flex flex-shrink-0 flex-col w-80"
       style={{ backgroundColor: isDarkMode ? '#0f0f0f' : '#fafafa' }}
     >
       <div className="p-4 border-b" style={{ borderColor: isDarkMode ? '#333' : '#e0e0e0' }}>
