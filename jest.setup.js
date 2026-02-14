@@ -1,53 +1,25 @@
 import '@testing-library/jest-dom'
 
 // Mock localStorage
-const localStorageMock = (() => {
-  let store = {}
+const localStorageMock = {
+  getItem: jest.fn(),
+  setItem: jest.fn(),
+  removeItem: jest.fn(),
+  clear: jest.fn(),
+}
+global.localStorage = localStorageMock
 
-  return {
-    getItem: (key) => store[key] || null,
-    setItem: (key, value) => {
-      store[key] = value.toString()
-    },
-    removeItem: (key) => {
-      delete store[key]
-    },
-    clear: () => {
-      store = {}
-    },
-  }
-})()
-
-Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock,
+// Mock window.matchMedia for theme detection
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: jest.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
 })
-
-// Mock WebSocket
-class MockWebSocket {
-  constructor(url) {
-    this.url = url
-    this.readyState = 0 // CONNECTING
-    setTimeout(() => {
-      this.readyState = 1 // OPEN
-      if (this.onopen) this.onopen()
-    }, 100)
-  }
-
-  send(data) {
-    // Mock send
-  }
-
-  close() {
-    this.readyState = 3 // CLOSED
-    if (this.onclose) this.onclose()
-  }
-}
-
-global.WebSocket = MockWebSocket
-
-// Suppress console errors in tests
-global.console = {
-  ...console,
-  error: jest.fn(),
-  warn: jest.fn(),
-}

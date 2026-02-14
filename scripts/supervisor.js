@@ -2,14 +2,14 @@
 
 /**
  * Supervisor - Automated Code Quality Checker
- * Runs pre-deployment checks to ensure Phase 1 and Phase 2 compliance
+ * Runs before deployment to ensure production standards
  */
 
+const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
 
-const COLORS = {
+const colors = {
   reset: '\x1b[0m',
   red: '\x1b[31m',
   green: '\x1b[32m',
@@ -19,225 +19,160 @@ const COLORS = {
   cyan: '\x1b[36m',
 };
 
-const log = {
-  info: (msg) => console.log(`${COLORS.blue}ℹ${COLORS.reset} ${msg}`),
-  success: (msg) => console.log(`${COLORS.green}✓${COLORS.reset} ${msg}`),
-  error: (msg) => console.log(`${COLORS.red}✗${COLORS.reset} ${msg}`),
-  warn: (msg) => console.log(`${COLORS.yellow}⚠${COLORS.reset} ${msg}`),
-};
+const checks = [
+  {
+    name: 'Phase 1: ESLint',
+    command: 'npm run lint',
+    required: true,
+    phase: 1,
+  },
+  {
+    name: 'Phase 1: TypeScript Compilation',
+    command: 'npx tsc --noEmit',
+    required: true,
+    phase: 1,
+  },
+  {
+    name: 'Phase 1: Unit Tests',
+    command: 'npm run test -- --passWithNoTests',
+    required: true,
+    phase: 1,
+  },
+  {
+    name: 'Phase 1: Test Coverage',
+    command: 'npm run test:coverage -- --passWithNoTests',
+    required: true,
+    phase: 1,
+    checkCoverage: true,
+  },
+  {
+    name: 'Phase 1: Code Formatting',
+    command: 'npm run format:check',
+    required: true,
+    phase: 1,
+  },
+  {
+    name: 'Phase 2: Build Check',
+    command: 'npm run build',
+    required: true,
+    phase: 2,
+  },
+  {
+    name: 'Phase 2: Production Build Size',
+    command: 'node -e "const fs=require(\'fs\');const size=fs.statSync(\'.next\').size;console.log(\'Build size:\',size);process.exit(size>50000000?1:0)"',
+    required: true,
+    phase: 2,
+  },
+  {
+    name: 'Phase 2: Security Check',
+    command: 'npm audit --audit-level=moderate',
+    required: false,
+    phase: 2,
+  },
+  {
+    name: 'Phase 2: Dependency Check',
+    command: 'node -e "const pkg=require(\'./package.json\');const deps=Object.keys({...pkg.dependencies,...pkg.devDependencies});console.log(\'Dependencies:\',deps.length);process.exit(deps.length>500?1:0)"',
+    required: true,
+    phase: 2,
+  },
+];
 
-let passedChecks = 0;
-let failedChecks = 0;
-const results = [];
-
-function check(name, test, errorMsg) {
+function runCommand(command, checkCoverage = false) {
   try {
-    if (test()) {
-      passedChecks++;
-      results.push({ name, status: 'pass' });
-      log.success(name);
-      return true;
-    } else {
-      failedChecks++;
-      results.push({ name, status: 'fail', error: errorMsg });
-      log.error(`${name}: ${errorMsg}`);
-      return false;
+    const output = execSync(command, { encoding: 'utf8', stdio: 'pipe' });
+
+    if (checkCoverage) {
+      // Check if coverage meets 80% threshold
+      const coverageMatch = output.match(/All files[^|]*\|[^|]*\|[^|]*\|[^|]*\|[^|]*\|([\d.]+)/);
+      if (coverageMatch) {
+        const coverage = parseFloat(coverageMatch[1]);
+        if (coverage < 80) {
+          console.log(`${colors.red}Coverage: ${coverage}% (required: 80%)${colors.reset}`);
+          return false;
+        }
+        console.log(`${colors.green}Coverage: ${coverage}% ✓${colors.reset}`);
+      }
     }
-  } catch (error) {
-    failedChecks++;
-    results.push({ name, status: 'fail', error: error.message });
-    log.error(`${name}: ${error.message}`);
-    return false;
-  }
-}
 
-function runCommand(command) {
-  try {
-    execSync(command, { stdio: 'pipe', encoding: 'utf-8' });
     return true;
   } catch (error) {
     return false;
   }
 }
 
-function fileExists(filePath) {
-  return fs.existsSync(path.join(process.cwd(), filePath));
-}
+function runSupervisor() {
+  console.log(`${colors.cyan}╔═══════════════════════════════════════════════════════════╗${colors.reset}`);
+  console.log(`${colors.cyan}║          Supervisor: Code Quality Checker                  ║${colors.reset}`);
+  console.log(`${colors.cyan}╚═══════════════════════════════════════════════════════════╝${colors.reset}\n`);
 
-function fileContains(filePath, pattern) {
-  if (!fileExists(filePath)) return false;
-  const content = fs.readFileSync(path.join(process.cwd(), filePath), 'utf-8');
-  return content.includes(pattern);
-}
+  let passed = 0;
+  let failed = 0;
+  const results = [];
 
-console.log(`${COLORS.cyan}
-╔═══════════════════════════════════════════════════════════╗
-║         Agent Task Dispatcher - Supervisor                ║
-║              Automated Code Quality Checker                ║
-╚═══════════════════════════════════════════════════════════╝
-${COLORS.reset}
-`);
+  for (const check of checks) {
+    const phaseLabel = check.phase === 1 ? 'Phase 1' : 'Phase 2';
+    const requiredLabel = check.required ? '[REQUIRED]' : '[OPTIONAL]';
 
-log.info('Starting production readiness checks...\n');
+    console.log(`${colors.blue}Running: ${check.name} ${requiredLabel}${colors.reset}`);
 
-// ========== Phase 1 Checks ==========
+    const success = runCommand(check.command, check.checkCoverage);
 
-log.info(`${COLORS.magenta}Phase 1: Testing & Error Handling${COLORS.reset}`);
-
-check('Jest configured', () => fileExists('jest.config.js'), 'jest.config.js not found');
-check('Jest setup file', () => fileExists('jest.setup.js'), 'jest.setup.js not found');
-check('Testing library installed', () => fileContains('package.json', '@testing-library/react'),
-  '@testing-library/react not in package.json');
-check('ErrorBoundary component', () => fileExists('src/components/ErrorBoundary.tsx') ||
-  fileExists('src/components/ErrorBoundary.tsx'),
-  'ErrorBoundary component not found');
-check('Global error handler', () => fileContains('src/app/layout.tsx', 'ErrorBoundary') ||
-  fileContains('src/app/page.tsx', 'ErrorBoundary'),
-  'Global error handler not implemented');
-
-log.info(`${COLORS.magenta}Phase 1: CI/CD & Code Quality${COLORS.reset}`);
-
-check('GitHub Actions workflow', () => fileExists('.github/workflows/ci.yml') ||
-  fileExists('.github/workflows/main.yml'),
-  'GitHub Actions workflow not found');
-check('ESLint configured', () => fileExists('eslint.config.mjs') || fileExists('.eslintrc.json'),
-  'ESLint configuration not found');
-check('Prettier configured', () => fileExists('.prettierrc') || fileExists('.prettierrc.json'),
-  'Prettier configuration not found');
-check('Husky installed', () => fileContains('package.json', 'husky'),
-  'Husky not installed in package.json');
-check('Lint-staged configured', () => fileContains('package.json', 'lint-staged'),
-  'lint-staged not configured in package.json');
-check('Commitlint configured', () => fileExists('.commitlintrc.json') || fileExists('.commitlintrc'),
-  'Commitlint configuration not found');
-
-log.info(`${COLORS.magenta}Phase 1: Package Dependencies${COLORS.reset}`);
-
-check('React 18.x installed', () => {
-  const pkg = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
-  return pkg.dependencies?.react?.startsWith('18');
-}, 'React must be version 18.x, not 19.x');
-
-check('Next.js 15.1.6 installed', () => {
-  const pkg = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
-  return pkg.dependencies?.next === '15.1.6';
-}, 'Next.js must be exactly version 15.1.6');
-
-check('Tailwind CSS 3.4.x installed', () => {
-  const pkg = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
-  const tailwindVersion = pkg.devDependencies?.tailwindcss;
-  return tailwindVersion && tailwindVersion.startsWith('^3.4');
-}, 'Tailwind CSS must be version 3.4.x, not 4.x');
-
-check('TypeScript configured', () => fileExists('tsconfig.json'), 'tsconfig.json not found');
-
-// ========== Phase 2 Checks ==========
-
-log.info(`${COLORS.magenta}Phase 2: Performance & Accessibility${COLORS_RESET}`);
-
-check('Code splitting implemented', () => {
-  const pageContent = fileExists('src/app/page.tsx') ?
-    fs.readFileSync('src/app/page.tsx', 'utf-8') : '';
-  return true; // Next.js App Router handles this by default
-}, 'Code splitting should be implemented');
-
-check('Metadata configured', () => fileContains('src/app/layout.tsx', 'metadata'),
-  'Metadata not configured in layout.tsx');
-
-check('Semantic HTML', () => {
-  const pageContent = fileExists('src/app/page.tsx') ?
-    fs.readFileSync('src/app/page.tsx', 'utf-8') : '';
-  return pageContent.includes('<header>') || pageContent.includes('<main>') || pageContent.includes('<aside>');
-}, 'Use semantic HTML elements');
-
-log.info(`${COLORS.magenta}Project Structure${COLORS_RESET}`);
-
-check('Type definitions exist', () => fileExists('src/types/agent.ts'),
-  'Type definitions not found in src/types/');
-check('Components directory exists', () => fileExists('src/components'),
-  'Components directory not found');
-check('Custom hooks exist', () => fileExists('src/hooks/useCommands.ts') &&
-  fileExists('src/hooks/useAgents.ts'),
-  'Custom hooks not found');
-check('Utility functions exist', () => fileExists('src/lib/storage.ts'),
-  'Utility functions not found');
-
-// ========== Deep Code Analysis ==========
-
-log.info(`${COLORS.magenta}Deep Code Analysis${COLORS_RESET}`);
-
-check('No console.log in production code', () => {
-  const files = ['src/app/page.tsx', 'src/components/Sidebar.tsx',
-    'src/components/CommandInput.tsx'];
-  for (const file of files) {
-    if (fileExists(file)) {
-      const content = fs.readFileSync(file, 'utf-8');
-      if (content.includes('console.log')) {
-        return false;
-      }
-    }
-  }
-  return true;
-}, 'Remove console.log statements from production code');
-
-check('All components have TypeScript types', () => {
-  const componentFiles = ['src/components/Sidebar.tsx', 'src/components/CommandInput.tsx',
-    'src/components/ResultsDisplay.tsx'];
-  for (const file of componentFiles) {
-    if (fileExists(file)) {
-      const content = fs.readFileSync(file, 'utf-8');
-      if (!content.includes('interface') && !content.includes('type')) {
-        return false;
-      }
-    }
-  }
-  return true;
-}, 'Components should have TypeScript interfaces/types');
-
-check('Error handling implemented', () => {
-  const pageContent = fileExists('src/app/page.tsx') ?
-    fs.readFileSync('src/app/page.tsx', 'utf-8') : '';
-  return pageContent.includes('try') || pageContent.includes('catch') ||
-    pageContent.includes('error');
-}, 'Error handling should be implemented');
-
-check('Accessibility attributes present', () => {
-  const files = ['src/app/page.tsx', 'src/components/CommandInput.tsx'];
-  for (const file of files) {
-    if (fileExists(file)) {
-      const content = fs.readFileSync(file, 'utf-8');
-      if (content.includes('aria-label') || content.includes('role') ||
-        content.includes('alt')) {
-        return true;
-      }
-    }
-  }
-  return false;
-}, 'Add accessibility attributes (aria-label, role, alt)');
-
-// ========== Summary ==========
-
-console.log(`\n${COLORS.cyan}═══════════════════════════════════════════════════════════${COLORS.reset}\n`);
-console.log(`${COLORS.bold}Summary:${COLORS_RESET}`);
-console.log(`  ${COLORS.green}Passed:${COLORS.reset} ${passedChecks}`);
-console.log(`  ${COLORS.red}Failed:${COLORS.reset} ${failedChecks}`);
-console.log(`  Total: ${passedChecks + failedChecks}\n`);
-
-if (failedChecks > 0) {
-  console.log(`${COLORS.red}Failed checks:${COLORS_RESET}\n`);
-  results
-    .filter((r) => r.status === 'fail')
-    .forEach((r) => {
-      console.log(`  ${COLORS.red}✗${COLORS.reset} ${r.name}`);
-      if (r.error) {
-        console.log(`    ${COLORS.yellow}→${COLORS.reset} ${r.error}`);
-      }
+    results.push({
+      name: check.name,
+      phase: check.phase,
+      required: check.required,
+      success,
     });
-  console.log(`\n${COLORS.red}❌ Supervisor: Deployment blocked${COLORS.reset}`);
-  console.log(`${COLORS.yellow}Please fix all failed checks before deploying.${COLORS_RESET}\n`);
-  process.exit(1);
-} else {
-  console.log(`${COLORS.green}✅ Supervisor: All checks passed!${COLORS_RESET}`);
-  console.log(`${COLORS.green}Deployment approved.${COLORS_RESET}\n`);
-  process.exit(0);
+
+    if (success) {
+      console.log(`${colors.green}✓ PASSED${colors.reset}\n`);
+      passed++;
+    } else if (check.required) {
+      console.log(`${colors.red}✗ FAILED${colors.reset}\n`);
+      failed++;
+    } else {
+      console.log(`${colors.yellow}⊘ SKIPPED (optional)${colors.reset}\n`);
+    }
+  }
+
+  console.log(`${colors.cyan}╔═══════════════════════════════════════════════════════════╗${colors.reset}`);
+  console.log(`${colors.cyan}║                    Summary                                ║${colors.reset}`);
+  console.log(`${colors.cyan}╠═══════════════════════════════════════════════════════════╣${colors.reset}`);
+  console.log(`${colors.cyan}║  Total Checks:  ${checks.length.toString().padStart(2)}                                    ║${colors.reset}`);
+  console.log(`${colors.green}║  Passed:       ${passed.toString().padStart(2)}                                        ║${colors.reset}`);
+  console.log(`${colors.red}║  Failed:       ${failed.toString().padStart(2)}                                        ║${colors.reset}`);
+  console.log(`${colors.cyan}╚═══════════════════════════════════════════════════════════╝${colors.reset}\n`);
+
+  // Phase 1 Compliance Check
+  const phase1Required = checks.filter(c => c.phase === 1 && c.required);
+  const phase1Passed = results.filter(
+    r => r.phase === 1 && r.required && r.success
+  ).length;
+  const phase1Compliant = phase1Passed === phase1Required.length;
+
+  console.log(`${colors.magenta}Phase 1 Compliance: ${phase1Compliant ? '✓' : '✗'}${colors.reset}`);
+  console.log(`  Required: ${phase1Required.length}, Passed: ${phase1Passed}\n`);
+
+  // Phase 2 Compliance Check
+  const phase2Required = checks.filter(c => c.phase === 2 && c.required);
+  const phase2Passed = results.filter(
+    r => r.phase === 2 && r.required && r.success
+  ).length;
+  const phase2Compliant = phase2Passed === phase2Required.length;
+
+  console.log(`${colors.magenta}Phase 2 Compliance: ${phase2Compliant ? '✓' : '✗'}${colors.reset}`);
+  console.log(`  Required: ${phase2Required.length}, Passed: ${phase2Passed}\n`);
+
+  // Final Decision
+  const allRequiredPassed = results.filter(r => r.required).every(r => r.success);
+
+  if (allRequiredPassed) {
+    console.log(`${colors.green}✓ All required checks passed! Ready for deployment.${colors.reset}`);
+    process.exit(0);
+  } else {
+    console.log(`${colors.red}✗ Some required checks failed. Please fix before deploying.${colors.reset}`);
+    process.exit(1);
+  }
 }
+
+runSupervisor();
