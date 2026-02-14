@@ -23,8 +23,12 @@ export function TaskResults({ task }: TaskResultsProps) {
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center">
           <div className="text-6xl mb-4">🤖</div>
-          <h3 className="text-xl font-semibold mb-2">No Active Task</h3>
-          <p className="text-gray-400 text-sm">Submit a task to see agent results here</p>
+          <h3 className="text-xl font-semibold mb-2" style={{ color: isDarkMode ? '#ffffff' : '#000000' }}>
+            No Active Task
+          </h3>
+          <p className="text-sm" style={{ color: isDarkMode ? '#d4d4d4' : '#666666' }}>
+            Submit a task to see agent results here
+          </p>
         </div>
       </div>
     );
@@ -37,20 +41,20 @@ export function TaskResults({ task }: TaskResultsProps) {
   return (
     <div className="flex-1 flex flex-col">
       <div className="p-6 border-b" style={{ borderColor: isDarkMode ? '#333' : '#e0e0e0' }}>
-        <h2 className="text-lg font-bold mb-2">Task Results</h2>
+        <h2 className="text-lg font-bold mb-2" style={{ color: isDarkMode ? '#ffffff' : '#000000' }}>Task Results</h2>
         <div className="flex gap-4 text-sm">
           <div>
-            <span className="text-gray-400">Type:</span>{' '}
+            <span style={{ color: isDarkMode ? '#999999' : '#666666' }}>Type:</span>{' '}
             <span className="font-semibold text-yellow-400">{task.type}</span>
           </div>
           <div>
-            <span className="text-gray-400">Progress:</span>{' '}
-            <span className="font-semibold">
+            <span style={{ color: isDarkMode ? '#999999' : '#666666' }}>Progress:</span>{' '}
+            <span className="font-semibold" style={{ color: isDarkMode ? '#ffffff' : '#000000' }}>
               {completedCount + errorCount} / {task.agents.length}
             </span>
           </div>
         </div>
-        <div className="mt-2 text-xs text-gray-400">
+        <div className="mt-2 text-xs" style={{ color: isDarkMode ? '#999999' : '#888888' }}>
           Created: {new Date(task.createdAt).toLocaleTimeString()}
         </div>
       </div>
@@ -92,7 +96,7 @@ export function TaskResults({ task }: TaskResultsProps) {
               <div className="flex items-center justify-between mb-2">
                 <div>
                   <h4 className="font-semibold text-yellow-400">{agent.name}</h4>
-                  <p className="text-xs text-gray-400">{agent.role}</p>
+                  <p className="text-xs" style={{ color: isDarkMode ? '#999999' : '#888888' }}>{agent.role}</p>
                 </div>
                 <span className={`text-xs font-medium px-2 py-1 rounded ${statusColors[agent.status]}`}>
                   {agent.status}
@@ -112,7 +116,7 @@ export function TaskResults({ task }: TaskResultsProps) {
               )}
 
               {agent.completedAt && (
-                <div className="mt-2 text-xs text-gray-400">
+                <div className="mt-2 text-xs" style={{ color: isDarkMode ? '#999999' : '#888888' }}>
                   Completed: {new Date(agent.completedAt).toLocaleTimeString()}
                 </div>
               )}

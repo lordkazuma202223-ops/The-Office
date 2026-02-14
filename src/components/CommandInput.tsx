@@ -25,7 +25,7 @@ export function CommandInput({ onSubmit, isRunning }: CommandInputProps) {
       <form onSubmit={handleSubmit}>
         <label className="block text-sm font-semibold mb-2 flex items-center gap-2">
           <span className="text-yellow-400">✦</span>
-          Task Command
+          <span style={{ color: isDarkMode ? '#ffffff' : '#000000' }}>Task Command</span>
         </label>
         <textarea
           value={command}

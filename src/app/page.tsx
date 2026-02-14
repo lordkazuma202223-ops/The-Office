@@ -90,7 +90,7 @@ export default function Home() {
         >
           <h1 className="text-xl font-bold flex items-center gap-2">
             <span className="text-yellow-400">⚡</span>
-            <span>The Office by Lofi</span>
+            <span style={{ color: isDarkMode ? '#ffffff' : '#000000' }}>The Office by Lofi</span>
           </h1>
           <div className="flex items-center gap-3">
             <TaskHistory
