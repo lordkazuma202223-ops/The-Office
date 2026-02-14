@@ -29,7 +29,9 @@ export function TaskHistory({ tasks, onSelectTask, onClearHistory }: TaskHistory
         <svg className="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <span className="text-sm hidden sm:inline">History ({tasks.length})</span>
+        <span className="text-sm hidden sm:inline" style={{ color: isDarkMode ? '#d4d4d4' : '#666666' }}>
+          History ({tasks.length})
+        </span>
       </button>
 
       {isOpen && (
@@ -73,7 +75,9 @@ export function TaskHistory({ tasks, onSelectTask, onClearHistory }: TaskHistory
             </div>
 
             {tasks.length === 0 ? (
-              <p className="text-sm text-gray-400">No tasks yet</p>
+              <p className="text-sm text-center" style={{ color: isDarkMode ? '#d4d4d4' : '#666666' }}>
+                No tasks yet
+              </p>
             ) : (
               <div className="space-y-2">
                 {tasks.map(task => (
@@ -90,16 +94,18 @@ export function TaskHistory({ tasks, onSelectTask, onClearHistory }: TaskHistory
                       backgroundColor: isDarkMode ? '#0a0a0a' : '#f5f5f5',
                     }}
                   >
-                    <div className="text-xs text-gray-400 mb-1">
+                    <div className="text-xs mb-1" style={{ color: isDarkMode ? '#999999' : '#888888' }}>
                       {new Date(task.createdAt).toLocaleString()}
                     </div>
-                    <div className="text-sm font-medium truncate">{task.command}</div>
+                    <div className="text-sm font-medium truncate" style={{ color: isDarkMode ? '#ffffff' : '#000000' }}>
+                      {task.command}
+                    </div>
                     <div className="flex gap-2 mt-2">
                       <span className="text-xs px-2 py-0.5 rounded text-yellow-400"
                         style={{ backgroundColor: '#facc1520' }}>
                         {task.type}
                       </span>
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs" style={{ color: isDarkMode ? '#d4d4d4' : '#666666' }}>
                         {task.agents.length} agents
                       </span>
                     </div>

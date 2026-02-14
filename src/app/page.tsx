@@ -30,7 +30,9 @@ export default function Home() {
       >
         <h1 className="text-lg font-bold flex items-center gap-2">
           <span className="text-yellow-400">⚡</span>
-          <span className="truncate">Agent Task</span>
+          <span className="truncate" style={{ color: isDarkMode ? '#ffffff' : '#000000' }}>
+            The Office
+          </span>
         </h1>
         <div className="flex items-center gap-3">
           <TaskHistory
@@ -62,7 +64,9 @@ export default function Home() {
           <svg className="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a3 3 0 11-6 0 3 3 0 016 0zM6 3a3 3 0 11-6 0 3 3 0 016 0zm7-6a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
-          <span className="text-xs text-gray-400">Agents</span>
+          <span className="text-xs" style={{ color: isDarkMode ? '#d4d4d4' : '#666666' }}>
+            Agents
+          </span>
         </button>
         <button
           className="flex flex-col items-center gap-1 p-2 rounded-lg touch-manipulation"
@@ -71,7 +75,9 @@ export default function Home() {
           <svg className="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002 2v2M7 7h10" />
           </svg>
-          <span className="text-xs text-gray-400">Tasks</span>
+          <span className="text-xs" style={{ color: isDarkMode ? '#d4d4d4' : '#666666' }}>
+            Tasks
+          </span>
         </button>
       </div>
 
@@ -84,7 +90,7 @@ export default function Home() {
         >
           <h1 className="text-xl font-bold flex items-center gap-2">
             <span className="text-yellow-400">⚡</span>
-            Agent Task Dispatcher
+            <span>The Office by Lofi</span>
           </h1>
           <div className="flex items-center gap-3">
             <TaskHistory
