@@ -24,6 +24,8 @@ export interface Agent {
   // OpenClaw session integration
   sessionKey?: string;
   prompt?: string;
+  // Collaboration role
+  isLead?: boolean;
   // Shared context for collaboration (read-only reference to task's shared context)
   sharedContext?: TaskSharedContext;
 }

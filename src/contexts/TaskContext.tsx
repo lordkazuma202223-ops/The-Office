@@ -5,11 +5,11 @@ import { Task, TaskSharedContext, AgentMessage } from '@/types/agent';
 import {
   spawnAgents,
   executeAgentTask,
-  executeAgentsInParallel,
+  executeAgentsSequentially,
   saveTaskToHistory,
   getTaskHistory,
   clearTaskHistory,
-} from '@/lib/agentDispatcher-real';
+} from '@/lib/agentDispatcher-collaborative';
 
 interface TaskContextType {
   currentTask: Task | null;
@@ -216,8 +216,8 @@ export function TaskProvider({ children }: { children: ReactNode }) {
 
     setCurrentTask(task);
 
-    // Execute all agents in parallel
-    await executeAgentsInParallel(
+    // Execute agents with sequential collaboration (lead first, then specialists)
+    await executeAgentsSequentially(
       task.agents,
       command,
       (agentId, progress, output) => {
