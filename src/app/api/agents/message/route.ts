@@ -4,22 +4,29 @@ import { NextRequest, NextResponse } from 'next/server';
 const GATEWAY_URL = process.env.OPENCLAW_GATEWAY_URL || 'http://localhost:18789';
 const GATEWAY_TOKEN = process.env.OPENCLAW_GATEWAY_TOKEN;
 
-interface MessageRequest {
-  fromSessionKey: string;
-  toSessionKey: string;
-  fromName: string;
-  toName: string;
-  type: 'info' | 'data' | 'request' | 'response';
-  message: string;
-  data?: any;
-}
-
 export async function POST(request: NextRequest) {
+  console.log('[MESSAGE] Route called');
+
   try {
-    const body: MessageRequest = await request.json();
+    const body = await request.json();
+    console.log('[MESSAGE] Request body:', JSON.stringify(body, null, 2));
+
+    console.log('[MESSAGE] GATEWAY_URL:', GATEWAY_URL);
+    console.log('[MESSAGE] GATEWAY_TOKEN:', GATEWAY_TOKEN ? 'SET' : 'NOT SET');
+
+    if (!GATEWAY_TOKEN) {
+      console.log('[MESSAGE ERROR] GATEWAY_TOKEN is not set!');
+      return NextResponse.json(
+        { ok: false, error: 'Gateway token is not configured' },
+        { status: 500 }
+      );
+    }
+
+    const messageUrl = `${GATEWAY_URL}/v1/sessions/send`;
+    console.log('[MESSAGE] Message URL:', messageUrl);
 
     // Send message via OpenClaw Gateway sessions_send skill
-    const response = await fetch(`${GATEWAY_URL}/v1/sessions/send`, {
+    const response = await fetch(messageUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -31,9 +38,12 @@ export async function POST(request: NextRequest) {
       }),
     });
 
+    console.log('[MESSAGE] Send response status:', response.status);
+    console.log('[MESSAGE] Send response ok:', response.ok);
+
     if (!response.ok) {
       const error = await response.text();
-      console.error('Failed to send agent message:', error);
+      console.log('[MESSAGE ERROR] Failed to send agent message:', error);
       return NextResponse.json(
         { ok: false, error: `Failed to send message: ${error}` },
         { status: response.status }
@@ -41,9 +51,11 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await response.json();
+    console.log('[MESSAGE] Send response data:', JSON.stringify(data, null, 2));
+
     return NextResponse.json({ ok: true, data });
   } catch (error) {
-    console.error('Error sending agent message:', error);
+    console.error('[MESSAGE ERROR] Exception:', error);
     return NextResponse.json(
       { ok: false, error: 'Internal server error', details: String(error) },
       { status: 500 }
