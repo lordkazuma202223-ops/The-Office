@@ -159,7 +159,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
     message: string,
     data?: any
   ) => {
-    const agentMessage: Task['agentMessages'][number] = {
+    const agentMessage = {
       from,
       fromName,
       to,
@@ -168,7 +168,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
       message,
       data,
       timestamp: new Date(),
-    };
+    } as Task['agentMessages'][number];
 
     setAgentMessages(prev => [...prev, agentMessage]);
 
