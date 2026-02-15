@@ -6,8 +6,9 @@ const GATEWAY_TOKEN = process.env.OPENCLAW_GATEWAY_TOKEN;
 
 interface SpawnRequest {
   task: string;
-  agentId?: string;
-  agentName?: string;
+  sessionTarget?: string;
+  cleanup?: string;
+  label?: string;
 }
 
 interface SpawnResponse {
@@ -20,8 +21,9 @@ export async function POST(request: NextRequest) {
   try {
     const body: SpawnRequest = await request.json();
 
-    // Spawn agent via OpenClaw Gateway
-    const response = await fetch(`${GATEWAY_URL}/api/sessions/spawn`, {
+    // Spawn session via OpenClaw Gateway sessions_spawn skill
+    // This uses the correct OpenClaw API method
+    const response = await fetch(`${GATEWAY_URL}/v1/sessions/spawn`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -29,14 +31,15 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({
         task: body.task,
-        sessionTarget: 'isolated',
-        cleanup: 'delete',
-        label: body.agentName || `Agent-${body.agentId}`,
+        sessionTarget: body.sessionTarget || 'isolated',
+        cleanup: body.cleanup || 'delete',
+        label: body.label,
       }),
     });
 
     if (!response.ok) {
       const error = await response.text();
+      console.error('Failed to spawn agent:', error);
       return NextResponse.json(
         { ok: false, error: `Failed to spawn agent: ${error}` },
         { status: response.status }

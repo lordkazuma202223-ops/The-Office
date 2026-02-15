@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 const GATEWAY_URL = process.env.OPENCLAW_GATEWAY_URL || 'http://localhost:18789';
 const GATEWAY_TOKEN = process.env.OPENCLAW_GATEWAY_TOKEN;
 
-interface AgentMessage {
+interface MessageRequest {
   fromSessionKey: string;
   toSessionKey: string;
   fromName: string;
@@ -16,10 +16,10 @@ interface AgentMessage {
 
 export async function POST(request: NextRequest) {
   try {
-    const body: AgentMessage = await request.json();
+    const body: MessageRequest = await request.json();
 
-    // Send message via OpenClaw Gateway sessions_send
-    const response = await fetch(`${GATEWAY_URL}/api/sessions/send`, {
+    // Send message via OpenClaw Gateway sessions_send skill
+    const response = await fetch(`${GATEWAY_URL}/v1/sessions/send`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -27,23 +27,25 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({
         sessionKey: body.toSessionKey,
-        message: `[Message from ${body.fromName} (${body.type}): ${body.message}`,
+        message: `[Message from ${body.fromName} (${body.type}): ${body.message}]`,
       }),
     });
 
     if (!response.ok) {
       const error = await response.text();
+      console.error('Failed to send agent message:', error);
       return NextResponse.json(
         { ok: false, error: `Failed to send message: ${error}` },
         { status: response.status }
       );
     }
 
-    return NextResponse.json({ ok: true });
+    const data = await response.json();
+    return NextResponse.json({ ok: true, data });
   } catch (error) {
     console.error('Error sending agent message:', error);
     return NextResponse.json(
-      { ok: false, error: 'Internal server error' },
+      { ok: false, error: 'Internal server error', details: String(error) },
       { status: 500 }
     );
   }
