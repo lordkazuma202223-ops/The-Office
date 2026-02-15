@@ -10,6 +10,7 @@ interface TaskResultsProps {
 
 const statusColors = {
   idle: 'text-gray-400',
+  spawning: 'text-blue-400',
   running: 'text-yellow-400',
   completed: 'text-green-400',
   error: 'text-red-400',
