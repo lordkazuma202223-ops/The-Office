@@ -36,23 +36,26 @@ export async function POST(request: NextRequest) {
       console.log('[SPAWN ERROR] GATEWAY_URL is not set!');
     }
 
-    // Build spawn URL
-    const spawnUrl = `${GATEWAY_URL}/v1/sessions/spawn`;
-    console.log('[SPAWN] Spawn URL:', spawnUrl);
+    // Build tools invoke URL
+    const invokeUrl = `${GATEWAY_URL}/tools/invoke`;
+    console.log('[SPAWN] Invoke URL:', invokeUrl);
 
-    // Spawn session via OpenClaw Gateway sessions_spawn skill
-    // This uses to correct OpenClaw API method
-    const response = await fetch(spawnUrl, {
+    // Spawn session via OpenClaw Gateway tools/invoke endpoint
+    // This uses the sessions_spawn tool
+    const response = await fetch(invokeUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${GATEWAY_TOKEN}`,
       },
       body: JSON.stringify({
-        task: body.task,
-        sessionTarget: body.sessionTarget || 'isolated',
-        cleanup: body.cleanup || 'delete',
-        label: body.label,
+        tool: 'sessions_spawn',
+        args: {
+          task: body.task,
+          sessionTarget: body.sessionTarget || 'isolated',
+          cleanup: body.cleanup || 'delete',
+          label: body.label,
+        },
       }),
     });
 
@@ -68,10 +71,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const data: SpawnResponse = await response.json();
-    console.log('[SPAWN] Spawn response data:', JSON.stringify(data, null, 2));
+    const data = await response.json();
+    console.log('[SPAWN] Invoke response data:', JSON.stringify(data, null, 2));
 
-    return NextResponse.json(data);
+    // The /tools/invoke endpoint returns { ok: true, result }
+    // We return just the result part for consistency
+    if (data.ok && data.result) {
+      return NextResponse.json(data.result);
+    } else {
+      return NextResponse.json(data);
+    }
   } catch (error) {
     console.error('[SPAWN ERROR] Exception:', error);
     return NextResponse.json(

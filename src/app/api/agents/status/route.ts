@@ -20,14 +20,22 @@ export async function GET(request: NextRequest) {
     }
 
     if (sessionKey) {
-      // Get specific session history
-      const historyUrl = `${GATEWAY_URL}/v1/sessions/history?sessionKey=${sessionKey}`;
-      console.log('[STATUS] Fetching history:', historyUrl);
+      // Get specific session history via tools/invoke
+      const historyUrl = `${GATEWAY_URL}/tools/invoke`;
+      console.log('[STATUS] Fetching history via tools/invoke');
 
       const response = await fetch(historyUrl, {
+        method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${GATEWAY_TOKEN}`,
         },
+        body: JSON.stringify({
+          tool: 'sessions_history',
+          args: {
+            sessionKey: sessionKey,
+          },
+        }),
       });
 
       console.log('[STATUS] History response status:', response.status);
@@ -43,18 +51,29 @@ export async function GET(request: NextRequest) {
       }
 
       const data = await response.json();
-      console.log('[STATUS] History data:', JSON.stringify(data, null, 2));
+      console.log('[STATUS] History response data:', JSON.stringify(data, null, 2));
 
-      return NextResponse.json(data);
+      // The /tools/invoke endpoint returns { ok: true, result }
+      if (data.ok) {
+        return NextResponse.json(data.result);
+      } else {
+        return NextResponse.json(data);
+      }
     } else {
-      // Get all active sessions
-      const listUrl = `${GATEWAY_URL}/v1/sessions/list`;
-      console.log('[STATUS] Fetching sessions list:', listUrl);
+      // Get all active sessions via tools/invoke
+      const listUrl = `${GATEWAY_URL}/tools/invoke`;
+      console.log('[STATUS] Fetching sessions list via tools/invoke');
 
       const response = await fetch(listUrl, {
+        method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${GATEWAY_TOKEN}`,
         },
+        body: JSON.stringify({
+          tool: 'sessions_list',
+          args: {},
+        }),
       });
 
       console.log('[STATUS] List response status:', response.status);
@@ -70,9 +89,14 @@ export async function GET(request: NextRequest) {
       }
 
       const data = await response.json();
-      console.log('[STATUS] Sessions list data:', JSON.stringify(data, null, 2));
+      console.log('[STATUS] Sessions list response data:', JSON.stringify(data, null, 2));
 
-      return NextResponse.json(data);
+      // The /tools/invoke endpoint returns { ok: true, result }
+      if (data.ok) {
+        return NextResponse.json(data.result);
+      } else {
+        return NextResponse.json(data);
+      }
     }
   } catch (error) {
     console.error('[STATUS ERROR] Exception:', error);

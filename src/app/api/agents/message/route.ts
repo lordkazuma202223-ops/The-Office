@@ -22,10 +22,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const messageUrl = `${GATEWAY_URL}/v1/sessions/send`;
+    const messageUrl = `${GATEWAY_URL}/tools/invoke`;
     console.log('[MESSAGE] Message URL:', messageUrl);
 
-    // Send message via OpenClaw Gateway sessions_send skill
+    // Send message via OpenClaw Gateway tools/invoke endpoint
+    // This uses the sessions_send tool
     const response = await fetch(messageUrl, {
       method: 'POST',
       headers: {
@@ -33,8 +34,11 @@ export async function POST(request: NextRequest) {
         'Authorization': `Bearer ${GATEWAY_TOKEN}`,
       },
       body: JSON.stringify({
-        sessionKey: body.toSessionKey,
-        message: `[Message from ${body.fromName} (${body.type}): ${body.message}]`,
+        tool: 'sessions_send',
+        args: {
+          sessionKey: body.toSessionKey,
+          message: `[Message from ${body.fromName} (${body.type}): ${body.message}]`,
+        },
       }),
     });
 
@@ -53,7 +57,12 @@ export async function POST(request: NextRequest) {
     const data = await response.json();
     console.log('[MESSAGE] Send response data:', JSON.stringify(data, null, 2));
 
-    return NextResponse.json({ ok: true, data });
+    // The /tools/invoke endpoint returns { ok: true, result }
+    if (data.ok) {
+      return NextResponse.json({ ok: true, data: data.result });
+    } else {
+      return NextResponse.json({ ok: false, error: data.error });
+    }
   } catch (error) {
     console.error('[MESSAGE ERROR] Exception:', error);
     return NextResponse.json(
