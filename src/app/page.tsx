@@ -6,6 +6,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Sidebar } from '@/components/Sidebar';
 import { CommandInput } from '@/components/CommandInput';
 import { TaskResults } from '@/components/TaskResults';
+import { AgentCollaboration } from '@/components/AgentCollaboration';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { TaskHistory } from '@/components/TaskHistory';
 import { Task } from '@/types/agent';
@@ -104,6 +105,7 @@ export default function Home() {
 
         <CommandInput onSubmit={submitTask} isRunning={isRunning} />
         <TaskResults task={currentTask} />
+        <AgentCollaboration />
       </main>
     </div>
   );

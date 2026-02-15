@@ -59,6 +59,65 @@ export function TaskResults({ task }: TaskResultsProps) {
         </div>
       </div>
 
+      {/* Agent Messages Section */}
+      {task.agentMessages && task.agentMessages.length > 0 && (
+        <div className="p-4 border-b" style={{ borderColor: isDarkMode ? '#333' : '#e0e0e0' }}>
+          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: isDarkMode ? '#ffffff' : '#000000' }}>
+            <span>💬</span>
+            <span>Agent Messages ({task.agentMessages.length})</span>
+          </h3>
+          <div className="space-y-2 max-h-40 overflow-y-auto">
+            {task.agentMessages.map((msg, idx) => (
+              <div
+                key={idx}
+                className="text-xs p-3 rounded border"
+                style={{
+                  borderColor: isDarkMode ? '#333' : '#e0e0e0',
+                  backgroundColor: isDarkMode ? '#1a1a1a' : '#f5f5f5',
+                }}
+              >
+                <div className="flex items-start gap-2 mb-1">
+                  <span className="font-semibold" style={{ color: isDarkMode ? '#d4d4d4' : '#666666' }}>
+                    {msg.fromName}
+                  </span>
+                  <span style={{ color: isDarkMode ? '#999999' : '#888888' }}>
+                    → {msg.toName}
+                  </span>
+                  <span
+                    className={`ml-auto px-2 py-0.5 rounded ${
+                      msg.type === 'info' ? 'text-blue-400' :
+                      msg.type === 'data' ? 'text-green-400' :
+                      msg.type === 'request' ? 'text-yellow-400' :
+                      'text-purple-400'
+                    }`}
+                  >
+                    {msg.type}
+                  </span>
+                </div>
+                <div className="mb-1" style={{ color: isDarkMode ? '#ffffff' : '#000000' }}>
+                  {msg.message}
+                </div>
+                {msg.data && (
+                  <div
+                    className="p-2 rounded text-xs font-mono"
+                    style={{
+                      backgroundColor: isDarkMode ? '#0a0a0a' : '#ffffff',
+                      border: `1px solid ${isDarkMode ? '#333' : '#e0e0e0'}`,
+                      color: isDarkMode ? '#d4d4d4' : '#666666',
+                    }}
+                  >
+                    {typeof msg.data === 'string' ? msg.data : JSON.stringify(msg.data, null, 2)}
+                  </div>
+                )}
+                <div className="text-xs" style={{ color: isDarkMode ? '#999999' : '#888888' }}>
+                  {new Date(msg.timestamp).toLocaleTimeString()}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="flex-1 overflow-y-auto p-6">
         <div className="mb-6">
           <div className="flex gap-2 mb-3">
@@ -120,10 +179,160 @@ export function TaskResults({ task }: TaskResultsProps) {
                   Completed: {new Date(agent.completedAt).toLocaleTimeString()}
                 </div>
               )}
+
+              {agent.sharedContext && (
+                <div
+                  className="mt-2 p-2 rounded border"
+                  style={{
+                    backgroundColor: isDarkMode ? '#0a0a0a' : '#ffffff',
+                    borderColor: isDarkMode ? '#333' : '#e0e0e0',
+                  }}
+                >
+                  <div className="text-xs font-semibold mb-2 flex items-center gap-2" style={{ color: isDarkMode ? '#d4d4d4' : '#666666' }}>
+                    <span>📊</span>
+                    <span>Shared Context Updates</span>
+                  </div>
+                  {Object.keys(agent.sharedContext).length > 0 ? (
+                    <div className="space-y-1">
+                      {Object.entries(agent.sharedContext).map(([key, value]) => (
+                        <div key={key} className="text-xs" style={{ color: isDarkMode ? '#d4d4d4' : '#666666' }}>
+                          <span className="font-medium">{key}:</span>{' '}
+                          <span style={{ color: isDarkMode ? '#ffffff' : '#000000' }}>
+                            {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-xs" style={{ color: isDarkMode ? '#999999' : '#888888' }}>
+                      No shared context updates
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>
       </div>
+
+      {/* Global Shared Context Section */}
+      {task.sharedContext && (
+        <div className="p-6 border-t" style={{ borderColor: isDarkMode ? '#333' : '#e0e0e0' }}>
+          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: isDarkMode ? '#ffffff' : '#000000' }}>
+            <span>🤝</span>
+            <span>Global Shared Context</span>
+          </h3>
+          <div className="space-y-3">
+            {task.sharedContext.website && Object.keys(task.sharedContext.website).length > 0 && (
+              <div>
+                <div className="text-xs font-semibold mb-2" style={{ color: isDarkMode ? '#d4d4d4' : '#666666' }}>
+                  Website Data
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  {Object.entries(task.sharedContext.website).map(([key, value]) => (
+                    <div
+                      key={key}
+                      className="p-2 rounded text-xs border"
+                      style={{
+                        borderColor: isDarkMode ? '#333' : '#e0e0e0',
+                        backgroundColor: isDarkMode ? '#1a1a1a' : '#f5f5f5',
+                      }}
+                    >
+                      <div className="font-medium mb-1" style={{ color: isDarkMode ? '#ffffff' : '#000000' }}>
+                        {key}
+                      </div>
+                      <div className="text-xs" style={{ color: isDarkMode ? '#999999' : '#888888' }}>
+                        {Array.isArray(value) ? `${value.length} items` : String(value)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {task.sharedContext.research && Object.keys(task.sharedContext.research).length > 0 && (
+              <div>
+                <div className="text-xs font-semibold mb-2" style={{ color: isDarkMode ? '#d4d4d4' : '#666666' }}>
+                  Research Data
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  {Object.entries(task.sharedContext.research).map(([key, value]) => (
+                    <div
+                      key={key}
+                      className="p-2 rounded text-xs border"
+                      style={{
+                        borderColor: isDarkMode ? '#333' : '#e0e0e0',
+                        backgroundColor: isDarkMode ? '#1a1a1a' : '#f5f5f5',
+                      }}
+                    >
+                      <div className="font-medium mb-1" style={{ color: isDarkMode ? '#ffffff' : '#000000' }}>
+                        {key}
+                      </div>
+                      <div className="text-xs" style={{ color: isDarkMode ? '#999999' : '#888888' }}>
+                        {Array.isArray(value) ? `${value.length} items` : String(value)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {task.sharedContext.data && Object.keys(task.sharedContext.data).length > 0 && (
+              <div>
+                <div className="text-xs font-semibold mb-2" style={{ color: isDarkMode ? '#d4d4d4' : '#666666' }}>
+                  Data Analysis
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  {Object.entries(task.sharedContext.data).map(([key, value]) => (
+                    <div
+                      key={key}
+                      className="p-2 rounded text-xs border"
+                      style={{
+                        borderColor: isDarkMode ? '#333' : '#e0e0e0',
+                        backgroundColor: isDarkMode ? '#1a1a1a' : '#f5f5f5',
+                      }}
+                    >
+                      <div className="font-medium mb-1" style={{ color: isDarkMode ? '#ffffff' : '#000000' }}>
+                        {key}
+                      </div>
+                      <div className="text-xs" style={{ color: isDarkMode ? '#999999' : '#888888' }}>
+                        {Array.isArray(value) ? `${value.length} items` : String(value)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {task.sharedContext.general && Object.keys(task.sharedContext.general).length > 0 && (
+              <div>
+                <div className="text-xs font-semibold mb-2" style={{ color: isDarkMode ? '#d4d4d4' : '#666666' }}>
+                  General Task Data
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  {Object.entries(task.sharedContext.general).map(([key, value]) => (
+                    <div
+                      key={key}
+                      className="p-2 rounded text-xs border"
+                      style={{
+                        borderColor: isDarkMode ? '#333' : '#e0e0e0',
+                        backgroundColor: isDarkMode ? '#1a1a1a' : '#f5f5f5',
+                      }}
+                    >
+                      <div className="font-medium mb-1" style={{ color: isDarkMode ? '#ffffff' : '#000000' }}>
+                        {key}
+                      </div>
+                      <div className="text-xs" style={{ color: isDarkMode ? '#999999' : '#888888' }}>
+                        {Array.isArray(value) ? `${value.length} items` : String(value)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -10,6 +10,7 @@ interface AgentItemProps {
 
 const statusColors = {
   idle: 'text-gray-400',
+  spawning: 'text-blue-400',
   running: 'text-yellow-400',
   completed: 'text-green-400',
   error: 'text-red-400',
@@ -17,6 +18,7 @@ const statusColors = {
 
 const statusBgColors = {
   idle: 'bg-gray-400',
+  spawning: 'bg-blue-400',
   running: 'bg-yellow-400',
   completed: 'bg-green-400',
   error: 'bg-red-400',
@@ -66,7 +68,7 @@ export function AgentItem({ agent }: AgentItemProps) {
         </div>
       )}
 
-      {(agent.status === 'running' || agent.status === 'idle') && (
+      {(agent.status === 'spawning' || agent.status === 'running' || agent.status === 'idle') && (
         <div className="flex gap-1 mt-2">
           {[0, 1, 2].map(i => (
             <div
