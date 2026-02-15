@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Task, TaskSharedContext } from '@/types/agent';
+import { Task, TaskSharedContext, AgentMessage } from '@/types/agent';
 import {
   spawnAgents,
   executeAgentTask,
@@ -18,22 +18,13 @@ interface TaskContextType {
   // Shared context for agent collaboration
   sharedContext: TaskSharedContext;
   // Agent messages between agents
-  agentMessages: {
-    from: string;
-    fromName: string;
-    to: string;
-    toName: string;
-    type: 'info' | 'data' | 'request' | 'response';
-    message: string;
-    data?: any;
-    timestamp: Date;
-  }[];
+  agentMessages: AgentMessage[];
   submitTask: (command: string) => Promise<void>;
   clearHistory: () => void;
   // Function for agents to update shared context
   updateSharedContext: (agentId: string, key: string, value: any) => void;
   // Function for agents to send messages to other agents
-  sendAgentMessage: (from: string, to: string, type: 'info' | 'data' | 'request' | 'response', message: string, data?: any) => void;
+  sendAgentMessage: (from: string, fromName: string, to: string, toName: string, type: 'info' | 'data' | 'request' | 'response', message: string, data?: any) => void;
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
@@ -42,7 +33,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
   const [currentTask, setCurrentTask] = useState<Task | null>(null);
   const [taskHistory, setTaskHistory] = useState<Task[]>([]);
   const [isRunning, setIsRunning] = useState(false);
-  const [agentMessages, setAgentMessages] = useState<Task['agentMessages']>([]);
+  const [agentMessages, setAgentMessages] = useState<AgentMessage[]>([]);
 
   // Initialize shared context for agent collaboration
   const initializeSharedContext = (taskType: Task['type'], command: string): TaskSharedContext => {
@@ -160,6 +151,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
     data?: any
   ) => {
     const agentMessage = {
+      id: `${from}-${to}-${Date.now()}`,
       from,
       fromName,
       to,
@@ -168,9 +160,9 @@ export function TaskProvider({ children }: { children: ReactNode }) {
       message,
       data,
       timestamp: new Date(),
-    } as Task['agentMessages'][number];
+    } as AgentMessage;
 
-    setAgentMessages(prev => [...prev, agentMessage]);
+    setAgentMessages((prev: AgentMessage[]) => [...prev, agentMessage]);
 
     // Update current task with message
     setCurrentTask(prev => {
@@ -183,7 +175,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
       return {
         ...prev,
         sharedContext,
-        agentMessages: [...prev.agentMessages, agentMessage],
+        agentMessages: [...(prev.agentMessages || []), agentMessage],
       };
     });
   };
@@ -286,7 +278,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         currentTask,
         taskHistory,
         isRunning,
-        sharedContext: currentTask?.sharedContext,
+        sharedContext: currentTask?.sharedContext || initializeSharedContext('general', ''),
         agentMessages,
         submitTask,
         clearHistory,

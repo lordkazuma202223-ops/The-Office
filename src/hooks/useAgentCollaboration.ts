@@ -1,16 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-
-interface AgentMessage {
-  id: string;
-  from: string;
-  fromName: string;
-  to: string;
-  toName: string;
-  type: 'info' | 'data' | 'request' | 'response';
-  message: string;
-  data?: any;
-  timestamp: Date;
-}
+import { AgentMessage } from '@/types/agent';
 
 export function useAgentCollaboration(agentId: string) {
   const [messages, setMessages] = useState<AgentMessage[]>([]);

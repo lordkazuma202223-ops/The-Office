@@ -30,9 +30,9 @@ export function AgentCollaboration() {
         </div>
       ) : (
         <div className="space-y-3 max-h-[400px] overflow-y-auto">
-          {messages.map((msg, index) => (
+          {messages.map((msg) => (
             <div
-              key={`${msg.from}-${index}`}
+              key={msg.id}
               className="p-3 rounded"
               style={{
                 backgroundColor: isDarkMode ? '#0a0a0a' : '#ffffff',

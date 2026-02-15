@@ -1,3 +1,15 @@
+export interface AgentMessage {
+  id: string;
+  from: string;
+  fromName: string;
+  to: string;
+  toName: string;
+  type: 'info' | 'data' | 'request' | 'response';
+  message: string;
+  data?: any;
+  timestamp: Date;
+}
+
 export interface Agent {
   id: string;
   name: string;
@@ -93,14 +105,5 @@ export interface Task {
   // Shared context for collaboration
   sharedContext: TaskSharedContext;
   // Message log between agents
-  agentMessages?: {
-    from: string;
-    fromName: string;
-    to: string;
-    toName: string;
-    type: 'info' | 'data' | 'request' | 'response';
-    message: string;
-    data?: any;
-    timestamp: Date;
-  }[];
+  agentMessages?: AgentMessage[];
 }
